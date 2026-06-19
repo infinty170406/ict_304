@@ -1,4 +1,7 @@
 FROM nginx:alpine
-# Copier les templates dans le répertoire natif de envsubst pour Nginx
-COPY nginx/templates /etc/nginx/templates
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/start-nginx.sh /start-nginx.sh
+RUN chmod +x /start-nginx.sh
+
 EXPOSE 80
+ENTRYPOINT ["/start-nginx.sh"]
