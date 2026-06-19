@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Users as UsersIcon, Shield } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const Users = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/accounts')
+    fetch(`${API_BASE_URL}/api/accounts`)
       .then(res => res.json())
       .then(data => {
         setAccounts(data);

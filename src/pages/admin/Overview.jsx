@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, Users, Activity, Server, Database } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const Overview = () => {
   const [accounts, setAccounts] = useState([]);
@@ -7,7 +8,7 @@ const Overview = () => {
   const [stats, setStats] = useState({ totalLiquidity: 0, totalUsers: 0 });
 
   useEffect(() => {
-    fetch('/api/accounts')
+    fetch(`${API_BASE_URL}/api/accounts`)
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();

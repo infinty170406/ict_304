@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, ArrowDownLeft, Activity, Wifi } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const Overview = () => {
   const [account, setAccount] = useState(null);
@@ -16,7 +17,7 @@ const Overview = () => {
 
   useEffect(() => {
     // Fetch real account data (assuming ID 1 for now)
-    fetch('/api/accounts/1')
+    fetch(`${API_BASE_URL}/api/accounts/1`)
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();

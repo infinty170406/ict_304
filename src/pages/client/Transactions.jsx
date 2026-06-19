@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Database, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/transactions/account/1')
+    fetch(`${API_BASE_URL}/api/transactions/account/1`)
       .then(res => res.json())
       .then(data => {
         // Sort by date descending if the API doesn't do it

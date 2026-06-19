@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, ArrowDownLeft, ArrowUpRight, Cpu } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const Operations = () => {
   const [amount, setAmount] = useState('');
@@ -19,10 +20,10 @@ const Operations = () => {
       description: description || 'No description'
     };
 
-    if (type === 'deposit') url = '/api/accounts/deposit';
-    else if (type === 'withdraw') url = '/api/accounts/withdraw';
+    if (type === 'deposit') url = `${API_BASE_URL}/api/accounts/deposit`;
+    else if (type === 'withdraw') url = `${API_BASE_URL}/api/accounts/withdraw`;
     else if (type === 'transfer') {
-      url = '/api/accounts/transfer';
+      url = `${API_BASE_URL}/api/accounts/transfer`;
       payload = {
         sourceAccountId: 1,
         destinationAccountId: parseInt(destAccountId),
