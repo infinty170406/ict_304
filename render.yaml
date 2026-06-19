@@ -2,11 +2,13 @@ databases:
   - name: banking-postgres
     databaseName: bankdb
     user: admin
+    plan: free
 
 services:
-  # 1. Transaction Service (Private)
-  - type: pserv
+  # 1. Transaction Service
+  - type: web
     name: transaction-service
+    plan: free
     env: docker
     dockerfilePath: Dockerfile.transaction
     envVars:
@@ -25,9 +27,10 @@ services:
           name: banking-postgres
           property: password
 
-  # 2. Account Service (Private)
-  - type: pserv
+  # 2. Account Service
+  - type: web
     name: account-service
+    plan: free
     env: docker
     dockerfilePath: Dockerfile.account
     envVars:
@@ -48,9 +51,10 @@ services:
           name: banking-postgres
           property: password
 
-  # 3. API Gateway Nginx (Web Service)
+  # 3. API Gateway Nginx
   - type: web
     name: api-gateway
+    plan: free
     env: docker
     dockerfilePath: Dockerfile.nginx
     envVars:
