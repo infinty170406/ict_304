@@ -76,3 +76,7 @@ services:
     envVars:
       - key: PORT
         value: 80
+      - key: ACCOUNT_SERVICE_URL
+        value: http://account-service:10000
+      - key: TRANSACTION_SERVICE_URL
+        value: http://transaction-service:10000

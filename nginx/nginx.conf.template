@@ -10,16 +10,9 @@ http {
     sendfile        on;
     keepalive_timeout  65;
 
-    # Backend upstream definitions
-    upstream account_service {
-        # 'account-service' est le nom du service interne sur Render (ou docker-compose)
-        server account-service:8081; 
-    }
-
-    upstream transaction_service {
-        # 'transaction-service' est le nom du service interne sur Render
-        server transaction-service:8082; 
-    }
+    # Les URLs des backends seront injectées via envsubst
+    # On n'utilise plus upstream pour éviter les crashs de Nginx au démarrage 
+    # si les services ne sont pas encore prêts (problème de résolution DNS Render).
 
     server {
         listen       80;
@@ -40,7 +33,7 @@ http {
                 add_header 'Content-Length' 0;
                 return 204;
             }
-            proxy_pass http://account_service;
+            proxy_pass ${ACCOUNT_SERVICE_URL};
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -56,7 +49,7 @@ http {
                 add_header 'Content-Length' 0;
                 return 204;
             }
-            proxy_pass http://transaction_service;
+            proxy_pass ${TRANSACTION_SERVICE_URL};
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
