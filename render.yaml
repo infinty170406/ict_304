@@ -45,7 +45,7 @@ services:
       - key: PORT
         value: 8081
       - key: TRANSACTION_URL
-        value: http://transaction-service:8082/api/transactions
+        value: https://transaction-service-lyn1.onrender.com/api/transactions
       - key: DB_HOST
         fromDatabase:
           name: banking-postgres

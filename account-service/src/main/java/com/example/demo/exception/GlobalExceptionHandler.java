@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        return createErrorResponse("Une erreur interne est survenue.", HttpStatus.INTERNAL_SERVER_ERROR);
+        ex.printStackTrace();
+        return createErrorResponse("Une erreur interne est survenue. Detail: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
