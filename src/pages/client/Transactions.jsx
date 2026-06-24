@@ -7,7 +7,8 @@ const Transactions = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/transactions/account/1`)
+    const accountId = localStorage.getItem('accountId') || 1;
+    fetch(`${API_BASE_URL}/api/transactions/account/${accountId}`)
       .then(res => res.json())
       .then(data => {
         // Sort by date descending if the API doesn't do it

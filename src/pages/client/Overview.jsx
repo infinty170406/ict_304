@@ -16,8 +16,9 @@ const Overview = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch real account data (assuming ID 1 for now)
-    fetch(`${API_BASE_URL}/api/accounts/1`)
+    const accountId = localStorage.getItem('accountId') || 1;
+    // Fetch real account data
+    fetch(`${API_BASE_URL}/api/accounts/${accountId}`)
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();

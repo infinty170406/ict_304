@@ -1,15 +1,48 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Key, Fingerprint } from 'lucide-react';
+import { API_BASE_URL } from '../utils/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState('client');
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (role === 'admin') navigate('/admin');
-    else navigate('/client');
+    if (role === 'admin') {
+      navigate('/admin');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Fetch all accounts to check if user exists
+      const res = await fetch(`${API_BASE_URL}/api/accounts`);
+      const accounts = await res.json();
+      
+      let account = accounts.find(a => a.name.toLowerCase() === username.toLowerCase());
+      
+      // If account doesn't exist, create it automatically
+      if (!account) {
+        const createRes = await fetch(`${API_BASE_URL}/api/accounts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: username, currency: 'USD', soldeInitial: 0 })
+        });
+        account = await createRes.json();
+      }
+      
+      // Save account ID to localStorage so the app knows who is logged in
+      localStorage.setItem('accountId', account.id);
+      navigate('/client');
+    } catch (err) {
+      console.error("Erreur de connexion:", err);
+      alert("Erreur de connexion au serveur !");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,7 +83,14 @@ const LoginPage = () => {
             <label className="mono-text" style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>IDENTIFIANT CRYPTOGRAPHIQUE</label>
             <div style={{ position: 'relative' }}>
               <Shield size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-              <input type="text" placeholder="Entrez votre clé publique" style={{ width: '100%', padding: '1rem 1rem 1rem 2.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', outline: 'none', fontFamily: 'monospace' }} />
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="Entrez votre nom (ex: Skyfall)" 
+                style={{ width: '100%', padding: '1rem 1rem 1rem 2.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', outline: 'none', fontFamily: 'monospace' }} 
+              />
             </div>
           </div>
 
@@ -62,8 +102,8 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <button type="submit" className="ghost-btn" style={{ marginTop: '1rem', background: role === 'admin' ? 'rgba(57,255,20,0.1)' : 'rgba(0,240,255,0.1)', borderColor: role === 'admin' ? '#39ff14' : '#00f0ff', color: role === 'admin' ? '#39ff14' : '#00f0ff' }}>
-            &gt;_ {role === 'admin' ? 'INITIER GOD MODE' : 'ACCÉDER AUX ACTIFS'}
+          <button type="submit" disabled={loading} className="ghost-btn" style={{ marginTop: '1rem', background: role === 'admin' ? 'rgba(57,255,20,0.1)' : 'rgba(0,240,255,0.1)', borderColor: role === 'admin' ? '#39ff14' : '#00f0ff', color: role === 'admin' ? '#39ff14' : '#00f0ff' }}>
+            {loading ? 'CONNEXION EN COURS...' : (role === 'admin' ? '>_ INITIER GOD MODE' : '>_ ACCÉDER AUX ACTIFS')}
           </button>
         </form>
       </div>

@@ -14,8 +14,9 @@ const Operations = () => {
     setMessage('');
     
     let url = '';
+    const currentAccountId = localStorage.getItem('accountId') || 1;
     let payload = {
-      accountId: 1, // Hardcoded for demo
+      accountId: Number(currentAccountId),
       amount: parseFloat(amount),
       description: description || 'No description'
     };
@@ -25,7 +26,7 @@ const Operations = () => {
     else if (type === 'transfer') {
       url = `${API_BASE_URL}/api/accounts/transfer`;
       payload = {
-        sourceAccountId: 1,
+        sourceAccountId: Number(currentAccountId),
         destinationAccountId: parseInt(destAccountId),
         amount: parseFloat(amount),
         description: description || 'Transfer'
