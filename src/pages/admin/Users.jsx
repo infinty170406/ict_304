@@ -55,7 +55,7 @@ const Users = () => {
                     <td style={{ padding: '16px', fontWeight: 500 }}>{acc.name}</td>
                     <td className="mono" style={{ padding: '16px', color: '#aaa' }}>{acc.currency || 'USD'}</td>
                     <td className="mono" style={{ padding: '16px', textAlign: 'right', color: 'var(--neon-cyan)', fontWeight: 'bold' }}>
-                      {acc.soldeInitial ? acc.soldeInitial.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00'}
+                      {acc.solde != null ? Number(acc.solde).toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00'}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <span className="mono" style={{ background: 'rgba(0,255,136,0.1)', color: 'var(--neon-green)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>

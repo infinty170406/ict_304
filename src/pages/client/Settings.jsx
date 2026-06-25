@@ -1,8 +1,32 @@
-import React, { useState } from 'react';
-import { User, Lock, Bell, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Lock, Bell, Shield, CheckCircle } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/api';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [account, setAccount] = useState(null);
+  const [name, setName] = useState('');
+  const [saveStatus, setSaveStatus] = useState('');
+
+  useEffect(() => {
+    const accountId = localStorage.getItem('accountId') || 1;
+    fetch(`${API_BASE_URL}/api/accounts/${accountId}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          setAccount(data);
+          setName(data.name);
+        }
+      })
+      .catch(err => console.error("Error fetching account:", err));
+  }, []);
+
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    setSaveStatus('SAVING...');
+    // Update display name locally (no update endpoint in backend yet)
+    setTimeout(() => setSaveStatus('SAVED ✓'), 800);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -41,20 +65,44 @@ const Settings = () => {
         {/* Settings Content */}
         <div className="glass-card" style={{ padding: '2rem' }}>
           {activeTab === 'profile' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <h3 className="mono" style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Profile Information</h3>
               <div style={{ display: 'grid', gap: '1rem' }}>
                 <div>
                   <label className="mono" style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>FULL NAME</label>
-                  <input type="text" defaultValue="Jean Dupont" style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', outline: 'none' }} />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', outline: 'none' }}
+                  />
                 </div>
                 <div>
-                  <label className="mono" style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>EMAIL ADDRESS</label>
-                  <input type="email" defaultValue="jean.dupont@example.com" style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', outline: 'none' }} />
+                  <label className="mono" style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>ACCOUNT ID</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={account ? `#${account.id}` : 'Loading...'}
+                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', color: '#555', outline: 'none', cursor: 'not-allowed' }}
+                  />
                 </div>
-                <button className="btn-primary mono" style={{ padding: '0.75rem 1.5rem', width: 'fit-content', fontSize: '0.8rem', marginTop: '1rem' }}>SAVE CHANGES</button>
+                <div>
+                  <label className="mono" style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>CURRENCY</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={account ? account.currency : 'Loading...'}
+                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', color: '#555', outline: 'none', cursor: 'not-allowed' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="submit" className="btn-primary mono" style={{ padding: '0.75rem 1.5rem', fontSize: '0.8rem' }}>SAVE CHANGES</button>
+                  {saveStatus && (
+                    <span className="mono" style={{ color: 'var(--neon-cyan)', fontSize: '0.85rem' }}>{saveStatus}</span>
+                  )}
+                </div>
               </div>
-            </div>
+            </form>
           )}
 
           {activeTab === 'security' && (

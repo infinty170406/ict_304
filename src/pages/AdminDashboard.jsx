@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal as TerminalIcon, Users, Globe, ShieldAlert, Activity, Server, Database } from 'lucide-react';
+import { API_BASE_URL } from '../utils/api';
 
 const AdminDashboard = () => {
   const [logs, setLogs] = useState([
     { type: 'system', text: 'Infinite Bank Admin initialized.' },
-    { type: 'system', text: 'Connected to global nodes: 4,021 active.' }
+    { type: 'system', text: 'Fetching live data from backend...' }
   ]);
   const [cmd, setCmd] = useState('');
   const endRef = useRef(null);
+  const [totalBalance, setTotalBalance] = useState(null);
+  const [accountCount, setAccountCount] = useState(null);
+  const [accounts, setAccounts] = useState([]);
 
   const scrollToBottom = () => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,6 +20,27 @@ const AdminDashboard = () => {
   useEffect(() => {
     scrollToBottom();
   }, [logs]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/accounts`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAccounts(data);
+          setAccountCount(data.length);
+          const total = data.reduce((sum, acc) => sum + (acc.solde || 0), 0);
+          setTotalBalance(total);
+          setLogs(prev => [
+            ...prev,
+            { type: 'success', text: `[OK] Loaded ${data.length} accounts from database.` },
+            { type: 'success', text: `[OK] Total assets: $${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}` }
+          ]);
+        }
+      })
+      .catch(err => {
+        setLogs(prev => [...prev, { type: 'error', text: `[ERR] Failed to connect to backend: ${err.message}` }]);
+      });
+  }, []);
 
   const handleCommand = (e) => {
     e.preventDefault();
@@ -37,11 +62,25 @@ const AdminDashboard = () => {
           { type: 'warning', text: '[WARN] Node 892 latency elevated (140ms)' },
           { type: 'success', text: 'Diagnostic complete. Network health: 99.8%' }
         ];
+      } else if (c === 'list_accounts' || c === 'accounts') {
+        response = accounts.length > 0
+          ? [
+              { type: 'info', text: `Listing ${accounts.length} accounts:` },
+              ...accounts.map(a => ({ type: 'success', text: `  [ID:${a.id}] ${a.name} — ${a.currency} $${Number(a.solde).toLocaleString('en-US')}` }))
+            ]
+          : [{ type: 'warning', text: 'No accounts found.' }];
       } else if (c === 'clear') {
         setLogs([]);
         return;
+      } else if (c === 'help') {
+        response = [
+          { type: 'info', text: 'Available commands:' },
+          { type: 'success', text: '  diagnostics   — Run system diagnostics' },
+          { type: 'success', text: '  accounts       — List all accounts' },
+          { type: 'success', text: '  clear          — Clear terminal' },
+        ];
       } else {
-        response = [{ type: 'error', text: `bash: ${cmd}: command not found. Try 'diagnostics'` }];
+        response = [{ type: 'error', text: `bash: ${cmd}: command not found. Try 'help'` }];
       }
 
       setLogs(prev => [...prev, ...response]);
@@ -76,14 +115,20 @@ const AdminDashboard = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', color: '#888' }}>
               <Globe size={20} color="var(--neon-cyan)" /> <span className="mono" style={{ fontSize: '0.9rem' }}>GLOBAL LIQUIDITY</span>
             </div>
-            <div className="mono" style={{ fontSize: '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(0,229,255,0.3)' }}>$ 8.42B</div>
+            <div className="mono" style={{ fontSize: totalBalance !== null && totalBalance > 1e9 ? '1.8rem' : '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(0,229,255,0.3)' }}>
+              {totalBalance !== null
+                ? `$ ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                : 'Loading...'}
+            </div>
           </div>
 
           <div className="glass-card" style={{ padding: '2rem', borderTop: '2px solid var(--neon-purple)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', color: '#888' }}>
               <Users size={20} color="var(--neon-purple)" /> <span className="mono" style={{ fontSize: '0.9rem' }}>ACTIVE IDENTITIES</span>
             </div>
-            <div className="mono" style={{ fontSize: '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(157,78,221,0.3)' }}>14,092,304</div>
+            <div className="mono" style={{ fontSize: '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(157,78,221,0.3)' }}>
+              {accountCount !== null ? accountCount.toLocaleString('en-US') : 'Loading...'}
+            </div>
           </div>
 
           <div className="glass-card" style={{ padding: '2rem', borderTop: '2px solid #fff' }}>

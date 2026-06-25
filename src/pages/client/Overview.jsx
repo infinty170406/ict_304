@@ -6,6 +6,8 @@ const Overview = () => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ping, setPing] = useState(12);
+  const [lastDeposit, setLastDeposit] = useState(null);
+  const [lastWithdrawal, setLastWithdrawal] = useState(null);
 
   // Simulate network ping fluctuation
   useEffect(() => {
@@ -17,7 +19,8 @@ const Overview = () => {
 
   useEffect(() => {
     const accountId = localStorage.getItem('accountId') || 1;
-    // Fetch real account data
+
+    // Fetch account data
     fetch(`${API_BASE_URL}/api/accounts/${accountId}`)
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
@@ -31,6 +34,22 @@ const Overview = () => {
         console.error("Error fetching account:", err);
         setLoading(false);
       });
+
+    // Fetch transaction history to get last deposit & withdrawal
+    fetch(`${API_BASE_URL}/api/transactions/account/${accountId}`)
+      .then(res => res.ok ? res.json() : [])
+      .then(transactions => {
+        if (!Array.isArray(transactions)) return;
+        const deposit = transactions.find(t =>
+          t.type === 'DEPOSIT' || t.type === 'deposit'
+        );
+        const withdrawal = transactions.find(t =>
+          t.type === 'WITHDRAWAL' || t.type === 'withdrawal'
+        );
+        if (deposit) setLastDeposit(deposit.amount);
+        if (withdrawal) setLastWithdrawal(withdrawal.amount);
+      })
+      .catch(err => console.error("Error fetching transactions:", err));
   }, []);
 
   return (
@@ -78,14 +97,18 @@ const Overview = () => {
                  <ArrowDownLeft size={20} color="var(--neon-cyan)" />
                  <span className="mono" style={{ color: '#888', fontSize: '0.8rem' }}>LAST DEPOSIT</span>
                </div>
-               <div className="mono" style={{ fontSize: '1.5rem', color: '#fff' }}>+ --.--</div>
+               <div className="mono" style={{ fontSize: '1.5rem', color: lastDeposit ? 'var(--neon-cyan)' : '#555' }}>
+                 {lastDeposit ? `+ ${Number(lastDeposit).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '+ --.--'}
+               </div>
             </div>
             <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', borderLeft: '3px solid var(--neon-purple)' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                  <ArrowUpRight size={20} color="var(--neon-purple)" />
                  <span className="mono" style={{ color: '#888', fontSize: '0.8rem' }}>LAST WITHDRAWAL</span>
                </div>
-               <div className="mono" style={{ fontSize: '1.5rem', color: '#fff' }}>- --.--</div>
+               <div className="mono" style={{ fontSize: '1.5rem', color: lastWithdrawal ? 'var(--neon-purple)' : '#555' }}>
+                 {lastWithdrawal ? `- ${Number(lastWithdrawal).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '- --.--'}
+               </div>
             </div>
           </div>
         </div>

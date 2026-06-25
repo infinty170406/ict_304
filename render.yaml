@@ -6,7 +6,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_BASE_URL
-        value: "https://votre-backend-url.onrender.com" # TODO: À remplacer par la vraie URL de votre backend
+        value: "https://api-gateway-j0ls.onrender.com"
     routes:
       - type: rewrite
         source: /*

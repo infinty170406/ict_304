@@ -17,5 +17,19 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: './src/setupTests.js',
     css: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'json-summary'],
+      exclude: [
+        'node_modules/',
+        'dist/',
+        'src/main.jsx',
+        'src/setupTests.js',
+        'vite.config.js',
+        '**/*.test.js',
+        '**/*.test.jsx',
+      ],
+      all: true
+    }
   }
 })

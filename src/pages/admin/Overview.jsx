@@ -15,7 +15,7 @@ const Overview = () => {
       })
       .then(data => {
         setAccounts(data);
-        const liquidity = data.reduce((sum, acc) => sum + (acc.soldeInitial || 0), 0);
+        const liquidity = data.reduce((sum, acc) => sum + (Number(acc.solde) || 0), 0);
         setStats({ totalLiquidity: liquidity, totalUsers: data.length });
         setLoading(false);
       })
