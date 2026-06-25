@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.Entity.Account;
 import org.springframework.web.client.RestTemplate;
 import com.example.demo.dto.CreateTransactionRequest;
+import com.example.demo.dto.CreateAccountRequest;
+import com.example.demo.exception.NotfoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.List;
 import com.example.demo.dto.TransactionRequest;
 import com.example.demo.dto.TransferRequest;
 import com.example.demo.repository.AccountRepo;
@@ -47,6 +50,63 @@ class AccountServiceTest {
         // Inject the URL value manually since @Value is not processed by Mockito
         ReflectionTestUtils.setField(accountService, "TRANSACTION_SERVICE_URL",
                 "https://transaction-service-lyn1.onrender.com/api/transactions");
+    }
+
+    @Test
+    void testCreateAccount_WithInitialValues() {
+        CreateAccountRequest request = new CreateAccountRequest("Jean", "EUR", new BigDecimal("1000.00"));
+        when(accountRepo.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Account created = accountService.createAccount(request);
+
+        assertNotNull(created);
+        assertEquals("Jean", created.getName());
+        assertEquals("EUR", created.getCurrency());
+        assertEquals(new BigDecimal("1000.00"), created.getSolde());
+        verify(accountRepo, times(1)).save(any(Account.class));
+    }
+
+    @Test
+    void testCreateAccount_WithNullValues() {
+        CreateAccountRequest request = new CreateAccountRequest("Jean", null, null);
+        when(accountRepo.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Account created = accountService.createAccount(request);
+
+        assertNotNull(created);
+        assertEquals("Jean", created.getName());
+        assertEquals("XAF", created.getCurrency());
+        assertEquals(BigDecimal.ZERO, created.getSolde());
+        verify(accountRepo, times(1)).save(any(Account.class));
+    }
+
+    @Test
+    void testGetAllAccounts() {
+        when(accountRepo.findAll()).thenReturn(List.of(testAccount, destAccount));
+
+        List<Account> accounts = accountService.getAllAccounts();
+
+        assertEquals(2, accounts.size());
+        verify(accountRepo, times(1)).findAll();
+    }
+
+    @Test
+    void testGetAccountById_Success() {
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(testAccount));
+
+        Account account = accountService.getAccountById(1L);
+
+        assertNotNull(account);
+        assertEquals(1L, account.getId());
+        verify(accountRepo, times(1)).findById(1L);
+    }
+
+    @Test
+    void testGetAccountById_NotFound() {
+        when(accountRepo.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotfoundException.class, () -> accountService.getAccountById(99L));
+        verify(accountRepo, times(1)).findById(99L);
     }
 
     @Test
@@ -95,5 +155,15 @@ class AccountServiceTest {
         verify(accountRepo, times(1)).save(testAccount);
         verify(accountRepo, times(1)).save(destAccount);
         verify(restTemplate, times(1)).postForLocation(anyString(), any(CreateTransactionRequest.class));
+    }
+
+    @Test
+    void testTransfer_InsufficientFunds() {
+        TransferRequest request = new TransferRequest(1L, 2L, new BigDecimal("1500.00"), "Transfer fail");
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(testAccount));
+        when(accountRepo.findById(2L)).thenReturn(Optional.of(destAccount));
+
+        assertThrows(IllegalArgumentException.class, () -> accountService.transfer(request));
+        verify(accountRepo, never()).save(any());
     }
 }

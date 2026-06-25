@@ -95,6 +95,36 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.11</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>com/example/demo/config/**</exclude>
+						<exclude>com/example/demo/dto/**</exclude>
+						<exclude>com/example/demo/Entity/**</exclude>
+						<exclude>com/example/demo/exception/*Exception.class</exclude>
+						<exclude>com/example/demo/DemoApplication.class</exclude>
+						<exclude>com/example/demo/repository/**</exclude>
+						<exclude>com/example/demo/service/Iservice/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

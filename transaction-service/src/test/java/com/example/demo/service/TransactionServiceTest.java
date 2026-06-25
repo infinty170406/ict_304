@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -51,7 +51,14 @@ class TransactionServiceTest {
         List<TransactionResponse> history = transactionService.getAccountHistory(1L);
 
         assertEquals(1, history.size());
-        assertEquals(new BigDecimal("500.00"), history.get(0).amount());
+        TransactionResponse response = history.get(0);
+        assertEquals(1L, response.id());
+        assertEquals(TransactionType.DEPOSIT, response.type());
+        assertEquals(new BigDecimal("500.00"), response.amount());
+        assertNull(response.sourceAccountId());
+        assertEquals(1L, response.destinationAccountId());
+        assertEquals(testTransaction.getTimestamp(), response.date());
+        assertEquals("Test deposit", response.description());
         verify(transactionRepo, times(1)).findBySourceAccountIdOrDestinationAccountIdOrderByTimestampDesc(1L, 1L);
     }
 
