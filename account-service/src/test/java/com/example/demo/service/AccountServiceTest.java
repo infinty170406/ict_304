@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.util.Optional;
 import com.example.demo.dto.TransactionRequest;
@@ -17,6 +18,7 @@ import com.example.demo.repository.AccountRepo;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +43,10 @@ class AccountServiceTest {
 
         destAccount = new Account("Dest Account", "XAF", new BigDecimal("500.00"));
         destAccount.setId(2L);
+
+        // Inject the URL value manually since @Value is not processed by Mockito
+        ReflectionTestUtils.setField(accountService, "TRANSACTION_SERVICE_URL",
+                "https://transaction-service-lyn1.onrender.com/api/transactions");
     }
 
     @Test
